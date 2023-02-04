@@ -1,44 +1,53 @@
 import axios from 'axios'
 const GITHUB_URL = process.env.REACT_APP_GITHUB_API_URL
-const GITHUB_TOKEN = process.env.REACT_APP_GITHUB_APIKEY
-// const GITHUB_TOKEN = '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1'
+const GITHUB_TOKEN = process.env.REACT_APP_GITHUB_APIKEY || ''
 
-const github = axios.create({
+//TODO: Handle if the limit reached, show error
+
+// SET AUTHORIZATION HEADER IF APIKEY EXIST; ELSE USE NO API
+const headers = {}
+if (GITHUB_TOKEN !== '') headers.Authorization = `token ${GITHUB_TOKEN}`
+
+// AXIOS INSTANCE
+const githubInstance = axios.create({
   baseURL: GITHUB_URL,
-  headers: {
-    Authorization: `token ${GITHUB_TOKEN}`,
-  },
+  headers: headers,
 })
 
 // SEARCH USERS
 export const searchUsers = async (text) => {
   const params = new URLSearchParams({ q: text })
 
-  const response = await github.get(`/search/users?${params}`)
+  const response = await githubInstance.get(`/search/users?${params}`)
 
-  if (response.status === 401) {
-    const { message } = await response.json()
-    window.location = '/ErrorPage'
-  }
+  // console.log(response.status)
+  // if (response.status === 401) {
+  //   console.log(response.data.message)
+  //   window.location = '/ErrorPage'
+  // }
 
+  // GET RESET LIMIT TIME
+  const timestamp = response.headers['x-ratelimit-reset']
+  const date = new Date(+timestamp * 1000)
+  const formattedDate = date.toLocaleString()
+
+  console.log(`Call limit will be reset at: ${formattedDate}`)
+
+  // console.log(response.headers)
   return response.data.items
-
-  // ERROR CHECKING
-  // After fetch from the API, response is store in data
-  // Dispatching by define the type of action and passin the data as payload
-  // And in reducer will decide what to do and passback the state
-  // Just like the useState the dispatch will up date the state, which now is populated with data that is fetched from the API
-  // pass in the data as payload to the reducer and execute the action in the reducer
-
-  // set isloading to true
 }
 
 // GET USER AND REPOS
 export const getUserAndRepos = async (login) => {
   const [user, repos] = await Promise.all([
-    github.get(`/users/${login}`),
-    github.get(`/users/${login}/repos`),
+    githubInstance.get(`/users/${login}`),
+    githubInstance.get(`/users/${login}/repos`),
   ])
+
+  console.log(
+    user.headers['x-ratelimit-remaining'],
+    repos.headers['x-ratelimit-remaining']
+  )
 
   return { user: user.data, repos: repos.data }
 }
