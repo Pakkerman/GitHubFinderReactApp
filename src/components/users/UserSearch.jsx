@@ -1,21 +1,24 @@
 import { useState, useContext } from 'react'
 import AlertContext from '../../context/alert/AlertContext'
 import GithubContext from '../../context/github/GithubContext'
+import { searchUsers } from '../../context/github/GithubActions'
 
 function UserSearch() {
   const [text, setText] = useState('')
-  const { users, searchUsers, clearSearch } = useContext(GithubContext)
+  const { users, dispatch } = useContext(GithubContext)
   const { setAlert } = useContext(AlertContext)
   // HANDLE SEARCH BOX TEXT CHANGE
   const handleChange = ({ target: { value } }) => setText(value)
 
   // HANDLE FORM SUBMIT
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
     if (text === '') {
       setAlert('Please Enter Something to Search', 'error')
     } else {
-      searchUsers(text)
+      dispatch({ type: 'SET_ISLOADING ' })
+      const users = await searchUsers(text)
+      dispatch({ type: 'GET_USERS', payload: users })
 
       setText('')
     }
@@ -23,8 +26,9 @@ function UserSearch() {
 
   // CLEAR SEARCH RESULT
   const handleClear = () => {
-    clearSearch()
+    dispatch({ type: 'CLEAR_SEARCH' })
   }
+  
   return (
     <div className="grid grid-cols-1 xl:grid-cols-2 lg:grid-col-2 md:grid-cols-2 mb-8 gap-8">
       <div>
