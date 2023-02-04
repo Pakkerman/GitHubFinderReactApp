@@ -1,6 +1,6 @@
 import { useState, useContext } from 'react'
 import AlertContext from '../../context/alert/AlertContext'
-import GithubContext from '../../context/GithubContext'
+import GithubContext from '../../context/github/GithubContext'
 
 function UserSearch() {
   const [text, setText] = useState('')
@@ -62,7 +62,7 @@ function UserSearch() {
 export default UserSearch
 
 // import { useState, useContext } from 'react'
-// import GithubContext from '../../context/GithubContext'
+// import GithubContext from '../../context/github/GithubContext'
 
 // function UserSearch() {
 //   const [text, setText] = useState('')

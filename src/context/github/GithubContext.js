@@ -1,9 +1,12 @@
-import { createContext, useReducer } from 'react'
+import { createContext, useContext, useReducer } from 'react'
+import { redirect } from 'react-router-dom'
+import AlertContext from '../alert/AlertContext'
 import githubReducer from './GithubReducer'
 
 const GithubContext = createContext()
 const GITHUB_URL = process.env.REACT_APP_GITHUB_API_URL
 const GITHUB_TOKEN = process.env.REACT_APP_GITHUB_APIKEY
+// const GITHUB_TOKEN = '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1'
 
 export const GithubProvider = ({ children }) => {
   // Initial state that contains an empty array
@@ -14,10 +17,8 @@ export const GithubProvider = ({ children }) => {
     isLoading: false,
   }
   // Just like useState, useReducer have a dispatch to set the state that is passed into the reducer, in this case, is the initial state
-  const [{ users, user, repos, isLoading }, dispatch] = useReducer(
-    githubReducer,
-    initialState
-  )
+  const [state, dispatch] = useReducer(githubReducer, initialState)
+  const { setAlert } = useContext(AlertContext)
 
   // GET INITIAL USERS (FOR TESTING)
   // const fetchUsers = async () => {
@@ -32,16 +33,22 @@ export const GithubProvider = ({ children }) => {
   const searchUsers = async (text) => {
     setIsLoading()
 
-    const params = new URLSearchParams({
-      q: text,
-    })
+    const params = new URLSearchParams({ q: text })
 
     const response = await fetch(`${GITHUB_URL}/search/users?${params}`, {
       headers: {
         Authorization: `token ${GITHUB_TOKEN}`,
       },
     })
+
+    if (response.status !== 200) {
+      const { message } = await response.json()
+      return setAlert(message, 'error')
+    }
+
     const { items } = await response.json()
+
+    // ERROR CHECKING
     // After fetch from the API, response is store in data
     // Dispatching by define the type of action and passin the data as payload
     // And in reducer will decide what to do and passback the state
@@ -114,10 +121,7 @@ export const GithubProvider = ({ children }) => {
   return (
     <GithubContext.Provider
       value={{
-        users,
-        user,
-        repos,
-        isLoading,
+        ...state,
         getUser,
         getRepos,
         searchUsers,

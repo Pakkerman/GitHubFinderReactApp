@@ -7,13 +7,13 @@ import Home from './pages/Home'
 import NotFound from './pages/NotFound'
 import Alert from './components/layout/Alert'
 import User from './pages/User'
-import { GithubProvider } from './context/GithubContext'
+import { GithubProvider } from './context/github/GithubContext'
 import { AlertProvider } from './context/alert/AlertContext'
 
 function App() {
   return (
-    <GithubProvider>
-      <AlertProvider>
+    <AlertProvider>
+      <GithubProvider>
         <Router>
           <div className="flex flex-col justify-between h-screen">
             <Navbar />
@@ -30,8 +30,8 @@ function App() {
             <Footer />
           </div>
         </Router>
-      </AlertProvider>
-    </GithubProvider>
+      </GithubProvider>
+    </AlertProvider>
   )
 }
 
