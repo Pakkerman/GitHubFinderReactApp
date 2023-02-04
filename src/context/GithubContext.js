@@ -7,7 +7,12 @@ const GITHUB_TOKEN = process.env.REACT_APP_GITHUB_APIKEY
 
 export const GithubProvider = ({ children }) => {
   // Initial state that contains an empty array
-  const initialState = { users: [], user: {}, repos: [], isLoading: false }
+  const initialState = {
+    users: [],
+    user: {},
+    repos: [],
+    isLoading: false,
+  }
   // Just like useState, useReducer have a dispatch to set the state that is passed into the reducer, in this case, is the initial state
   const [{ users, user, repos, isLoading }, dispatch] = useReducer(
     githubReducer,
@@ -49,7 +54,7 @@ export const GithubProvider = ({ children }) => {
     // set isloading to true
   }
 
-  // SEARCH SINGLE USER
+  // GET SINGLE USER PROVILE
   const getUser = async (login) => {
     setIsLoading()
 
@@ -79,11 +84,19 @@ export const GithubProvider = ({ children }) => {
   const getRepos = async (login) => {
     setIsLoading()
 
-    const response = await fetch(`${GITHUB_URL}/users/${login}/repos`, {
-      headers: {
-        Authorization: `token ${GITHUB_TOKEN}`,
-      },
+    const params = new URLSearchParams({
+      sort: 'created',
+      per_page: 10,
     })
+
+    const response = await fetch(
+      `${GITHUB_URL}/users/${login}/repos?${params}`,
+      {
+        headers: {
+          Authorization: `token ${GITHUB_TOKEN}`,
+        },
+      }
+    )
 
     const data = await response.json()
 
